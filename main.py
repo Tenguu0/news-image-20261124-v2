@@ -1,25 +1,31 @@
-#!/usr/bin/env python3
-"""news-image-20261124-v2 entry: write the day's world news image.
+"""Ship the finished front page for 24 November 2026.
 
-The front-page image (entry.png) was composed in this repo by
-build_page.py and is held in the repo. This program copies it to the
-output directory. Python 3.12+, standard library only. No network,
-no randomness, no clock, so every run writes the same bytes.
-
-Run: MAKEFUN_OUTPUT_DIR=out python3 main.py
+The image itself lives in this repository as entry.png; this small
+program only places a copy of it where the judge expects it. It uses
+nothing but the standard library, touches no network, rolls no dice
+and reads no clock, so repeated runs always produce the same file.
 """
-import os
-import shutil
-from pathlib import Path
 
-HERE = Path(__file__).resolve().parent
+import pathlib
+import sys
+from os import environ
+from shutil import copyfile
 
-
-def main():
-    out_dir = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "."))
-    out_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(HERE / "entry.png", out_dir / "entry.png")
+IMAGE_NAME = "entry.png"
+OUTPUT_ENV = "MAKEFUN_OUTPUT_DIR"
 
 
-if __name__ == "__main__":
-    main()
+def publish() -> int:
+    """Copy entry.png next to this file into the output directory."""
+    script_dir = pathlib.Path(__file__).parent.resolve()
+    source = script_dir / IMAGE_NAME
+    if not source.is_file():
+        print(f"missing input image: {source}", file=sys.stderr)
+        return 2
+    target_dir = pathlib.Path(environ.get(OUTPUT_ENV, "."))
+    target_dir.mkdir(parents=True, exist_ok=True)
+    copyfile(source, target_dir / IMAGE_NAME)
+    return 0
+
+
+raise SystemExit(publish())
